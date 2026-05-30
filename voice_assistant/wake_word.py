@@ -32,8 +32,7 @@ logger = logging.getLogger("smartfocus.voice")
 
 # OpenWakeWord requires exactly 1280 frames at 16 kHz (80 ms)
 _CHUNK_FRAMES = 1280
-_SAMPLE_RATE = 16_000  # Hz — fixed by OpenWakeWord
-
+_SAMPLE_RATE = 44_100  # Hz — USB mic compatible
 # Minimum seconds between consecutive detections (prevents double-firing)
 _DETECTION_COOLDOWN_S = 1.0
 
