@@ -111,7 +111,7 @@ ALERT_MUTE_DURATION: int = 900        # seconds (15 min) — silences all alerts
 MAX_RECORDING_SECONDS: float = 8.0
 SILENCE_TIMEOUT_SECONDS: float = 2.0
 SILENCE_RMS_THRESHOLD: float = 0.01  # RMS energy below = silence
-AUDIO_SAMPLE_RATE: int = 16000
+AUDIO_SAMPLE_RATE: int = 44100
 AUDIO_CHANNELS: int = 1
 
 # ── Break timer ───────────────────────────────────────────────────────────────
