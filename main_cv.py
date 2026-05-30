@@ -35,13 +35,18 @@ def _has_display() -> bool:
 
 
 def open_camera(index: int):
-    import platform
-    backends: list[int] = []
-    # Linux/Pi: prefer V4L2
-    if platform.system() == "Linux":
-        if hasattr(cv2, "CAP_V4L2"):
-            backends.append(cv2.CAP_V4L2)
+    import platform, os
+
+    # Raspberry Pi — Pi Camera via rpicam-vid MJPEG TCP stream
+    # Lance rpicam-vid séparément avec : 
+    # rpicam-vid -t 0 --width 640 --height 480 --codec mjpeg --listen -o tcp://0.0.0.0:8888 &
+    if platform.system() == "Linux" and os.path.exists("/usr/bin/rpicam-vid"):
+        cap = cv2.VideoCapture("tcp://127.0.0.1:8888")
+        if cap.isOpened():
+            return cap
+
     # Windows: prefer DirectShow then Media Foundation
+    backends: list[int] = []
     if hasattr(cv2, "CAP_DSHOW"):
         backends.append(cv2.CAP_DSHOW)
     if hasattr(cv2, "CAP_MSMF"):
