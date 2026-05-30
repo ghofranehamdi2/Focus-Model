@@ -32,7 +32,8 @@ logger = logging.getLogger("smartfocus.voice")
 
 # OpenWakeWord requires exactly 1280 frames at 16 kHz (80 ms)
 _CHUNK_FRAMES = 1280
-_SAMPLE_RATE = 44_100  # Hz — USB mic compatible
+_SAMPLE_RATE = 16_000  # Hz — fixed by OpenWakeWord
+
 # Minimum seconds between consecutive detections (prevents double-firing)
 _DETECTION_COOLDOWN_S = 1.0
 
@@ -135,7 +136,8 @@ class WakeWordListener:
                 channels=1,
                 dtype="int16",
                 blocksize=_CHUNK_FRAMES,
-            )
+                device=2,  # USB PnP Sound Device
+)
         except sd.PortAudioError as exc:
             self._mic_available = False
             logger.error("[WakeWord] Cannot open microphone: %s", exc)
@@ -166,7 +168,8 @@ class WakeWordListener:
                     continue
 
                 score = float(prediction.get(config.WAKE_WORD_MODEL, 0.0))
-
+                if score > 0.1:
+                    print(f"Score: {score:.3f}")
                 if score >= config.WAKE_WORD_SENSITIVITY:
                     now = time.monotonic()
                     if now - self._last_detection >= _DETECTION_COOLDOWN_S:
