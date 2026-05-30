@@ -113,12 +113,12 @@ def configure_logging(debug: bool) -> None:
 
 
 def print_banner(session_id: str, backend_url: str, provider: str) -> None:
-    sep = "═" * 56
+    sep = "=" * 56
     arch = platform.machine()
     os_name = f"{platform.system()} {platform.release()} ({arch})"
 
     print(f"\n{sep}")
-    print("   🎙  SmartFocus Voice Assistant")
+    print("   SmartFocus Voice Assistant")
     print(sep)
     print(f"   Platform   : {os_name}")
     print(f"   Provider   : {provider}")

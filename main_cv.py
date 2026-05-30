@@ -26,8 +26,22 @@ PHONE_SKIP   = 8    # FASTER (was 12)
 CAL_SECONDS  = 3
 
 
+def _has_display() -> bool:
+    """Returns True if a graphical display is available."""
+    import platform, os
+    if platform.system() == "Windows":
+        return True
+    return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+
+
 def open_camera(index: int):
+    import platform
     backends: list[int] = []
+    # Linux/Pi: prefer V4L2
+    if platform.system() == "Linux":
+        if hasattr(cv2, "CAP_V4L2"):
+            backends.append(cv2.CAP_V4L2)
+    # Windows: prefer DirectShow then Media Foundation
     if hasattr(cv2, "CAP_DSHOW"):
         backends.append(cv2.CAP_DSHOW)
     if hasattr(cv2, "CAP_MSMF"):
@@ -88,8 +102,11 @@ class SmartFocusPipelineV3:
         self.fat_smoother = ScoreSmoother(window_size=5)
         self.pos_smoother = ScoreSmoother(window_size=5)
 
-        # Optional UI (minimal; no raw intermediate states)
-        self.ui = MinimalUI(window_name="SmartFocus", debug=ui_debug) if ui else None
+        # Optional UI — disabled automatically when no display is available
+        ui_active = ui and _has_display()
+        if ui and not ui_active:
+            print("[SmartFocus] No display detected — running headless (UI disabled).")
+        self.ui = MinimalUI(window_name="SmartFocus", debug=ui_debug) if ui_active else None
 
         # Camera
         self.cap = open_camera(camera_index)
