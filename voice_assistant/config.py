@@ -90,8 +90,7 @@ PIPER_VOICE_JSON_URL: str = (
 # "hey_jarvis" is the closest available model to "Hey Focus".
 # Sensitivity 0.5 balances false positives vs missed detections.
 WAKE_WORD_MODEL: str = "hey_jarvis"
-WAKE_WORD_SENSITIVITY: float = 0.3
-
+WAKE_WORD_SENSITIVITY: float = 0.5  # était 0.30
 # ── CV alert thresholds ───────────────────────────────────────────────────────
 FOCUS_ALERT_THRESHOLD: int = 40       # % — alert when global_focus_score < this
 CRITICAL_FOCUS_THRESHOLD: int = 20   # % — critical alert when focus is extremely low
