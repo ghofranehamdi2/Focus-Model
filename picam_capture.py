@@ -2,7 +2,7 @@ import subprocess, numpy as np, cv2
 
 class PiCamCapture:
     """Wrapper rpicam-vid → interface VideoCapture pour main_cv.py"""
-    def __init__(self, width=640, height=480, fps=30):
+    def __init__(self, width=1920, height=1080, fps=15):
         cmd = ["rpicam-vid", "-t", "0",
                "--width", str(width), "--height", str(height),
                "--framerate", str(fps), "--codec", "mjpeg", "-o", "-"]
