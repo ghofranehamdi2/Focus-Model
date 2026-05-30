@@ -35,15 +35,18 @@ def _has_display() -> bool:
 
 
 def open_camera(index: int):
-    import platform, os
+    import platform, os, subprocess
 
-    # Raspberry Pi — Pi Camera via rpicam-vid MJPEG TCP stream
-    # Lance rpicam-vid séparément avec : 
-    # rpicam-vid -t 0 --width 640 --height 480 --codec mjpeg --listen -o tcp://0.0.0.0:8888 &
+    # Raspberry Pi — Pi Camera via rpicam-vid MJPEG pipe
     if platform.system() == "Linux" and os.path.exists("/usr/bin/rpicam-vid"):
-        cap = cv2.VideoCapture("tcp://127.0.0.1:8888")
-        if cap.isOpened():
-            return cap
+        from picam_capture import PiCamCapture
+        return PiCamCapture()
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        cap = cv2.VideoCapture(proc.stdout.fileno())
+        if not cap.isOpened():
+            # Fallback : lire manuellement le pipe MJPEG
+            return proc  # géré dans la boucle principale
+        return cap
 
     # Windows: prefer DirectShow then Media Foundation
     backends: list[int] = []
