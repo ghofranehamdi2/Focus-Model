@@ -133,7 +133,7 @@ class WakeWordListener:
         try:
             stream = sd.InputStream(
                 samplerate=_SAMPLE_RATE,
-                channels=2,
+                channels=1,
                 dtype="int16",
                 blocksize=_CHUNK_FRAMES,
                 device=3,  # USB PnP Sound Device
