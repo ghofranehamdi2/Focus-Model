@@ -13,6 +13,7 @@
 # ── Computer Vision ───────────────────────────────────────────────────────────
 mediapipe>=0.10.14
 opencv-python-headless>=4.8.0   # headless = no Qt/GUI, lighter on Pi
+protobuf>=3.20,<5               # mediapipe 0.10.x incompatible with protobuf>=5
 
 # ── TFLite inference — phone detection on Pi ARM64 ───────────────────────────
 # (ultralytics/PyTorch not needed: phone_detector.py auto-selects TFLite on ARM64)

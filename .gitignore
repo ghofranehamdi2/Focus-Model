@@ -19,9 +19,17 @@ env/
 *.onnx
 yolo26n_saved_model/
 
-# Output / logs
+# TFLite model is committed (models/yolo26n.tflite) — do NOT ignore *.tflite
+
+# Piper TTS binary and voice models (auto-downloaded on first run)
+voice_assistant/piper_bin/
+voice_assistant/piper_models/
+
+# Output / logs / session data
 output/
 session_log.txt
+session_summary.json
+*.jsonl
 
 # IDE
 .vscode/
