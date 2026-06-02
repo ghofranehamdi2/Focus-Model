@@ -49,25 +49,28 @@ else
 
     echo "    Waiting for session file..."
     SESSIONS_DIR="$SCRIPT_DIR/output/sessions"
-    TIMEOUT=60; ELAPSED=0; FOUND=false
+    
+    VOICE_PID=$!
+    echo "    Voice assistant PID: $VOICE_PID"
+    TIMEOUT=60; ELAPSED=0; SESSION_ID=""
     while [[ $ELAPSED -lt $TIMEOUT ]]; do
-        if ls "$SESSIONS_DIR"/*.jsonl 2>/dev/null | grep -v "_summary" | grep -q .; then
-            FOUND=true
-            echo "    Session file found."
+        LATEST=$(ls -t "$SESSIONS_DIR"/*.jsonl 2>/dev/null | grep -v "_summary" | head -1)
+        if [[ -n "$LATEST" ]]; then
+            sleep 2
+            LATEST=$(ls -t "$SESSIONS_DIR"/*.jsonl 2>/dev/null | grep -v "_summary" | head -1)
+            SESSION_ID=$(basename "$LATEST" .jsonl)
+            echo "    Session file found: $SESSION_ID"
             break
         fi
         sleep 1; ELAPSED=$((ELAPSED + 1))
         echo "    ... ${ELAPSED}s"
     done
-    if ! $FOUND; then
+    if [[ -z "$SESSION_ID" ]]; then
         echo "[WARN] No session file after ${TIMEOUT}s — voice assistant will use temp ID."
     fi
 
     echo "[2] Starting Voice Assistant..."
-    "$PYTHON" run_voice_assistant.py &
-    VOICE_PID=$!
-    echo "    Voice assistant PID: $VOICE_PID"
-
+    "$PYTHON" run_voice_assistant.py --session-id "$SESSION_ID" &
     echo ""
     echo "Both processes running. Press Ctrl-C to stop both."
     trap "kill $CV_PID $VOICE_PID 2>/dev/null; echo 'Stopped.'" EXIT INT TERM
