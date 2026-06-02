@@ -124,7 +124,7 @@ class CVMonitor:
         session JSONL. More stable than a single frame, more reactive than the
         full-session average.
         """
-        from datetime import datetime, timezone
+        import time as _time
 
         if not config.SESSIONS_DIR.exists():
             return None
@@ -136,37 +136,12 @@ class CVMonitor:
         if not all_files:
             return None
 
-        # Pick the file with the most recent last-frame timestamp
-        best_file = None
-        best_ts = ""
-        for f in all_files:
-            try:
-                with open(f, "r", encoding="utf-8") as fh:
-                    last = None
-                    for line in fh:
-                        s = line.strip()
-                        if s:
-                            last = s
-                if not last:
-                    continue
-                entry = json.loads(last)
-                ts = entry.get("timestamp", "")
-                if ts > best_ts and entry.get("scores"):
-                    best_ts = ts
-                    best_file = f
-            except (OSError, json.JSONDecodeError):
-                continue
+        # Pick the most recently written file using filesystem mtime
+        best_file = max(all_files, key=lambda f: f.stat().st_mtime)
 
-        if best_file is None:
+        # Reject stale data — session has ended (no write in last 30 s)
+        if (_time.time() - best_file.stat().st_mtime) > 30:
             return None
-
-        # Reject stale data — session has ended
-        try:
-            frame_ts = datetime.strptime(best_ts, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-            if (datetime.now(timezone.utc) - frame_ts).total_seconds() > 30:
-                return None
-        except Exception:
-            pass
 
         # Read last N frames and average their scores
         try:

@@ -91,6 +91,10 @@ PIPER_VOICE_JSON_URL: str = (
 # Sensitivity 0.5 balances false positives vs missed detections.
 WAKE_WORD_MODEL: str = "hey_jarvis"
 WAKE_WORD_SENSITIVITY: float = 0.3  # était 0.30
+# Microphone device index for sounddevice (None = system default).
+# Run `python -m sounddevice` to list devices; set to the USB mic index.
+# Windows dev: typically 1; RPi5: check with `python -m sounddevice` on the Pi.
+WAKE_WORD_MIC_DEVICE: int | None = None
 # ── CV alert thresholds ───────────────────────────────────────────────────────
 FOCUS_ALERT_THRESHOLD: int = 40       # % — alert when global_focus_score < this
 CRITICAL_FOCUS_THRESHOLD: int = 20   # % — critical alert when focus is extremely low

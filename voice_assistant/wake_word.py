@@ -136,7 +136,7 @@ class WakeWordListener:
                 channels=1,
                 dtype="int16",
                 blocksize=_CHUNK_FRAMES,
-                device=3,  # USB PnP Sound Device
+                device=config.WAKE_WORD_MIC_DEVICE,
 )
         except sd.PortAudioError as exc:
             self._mic_available = False
