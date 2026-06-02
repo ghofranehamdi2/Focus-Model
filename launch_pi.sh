@@ -42,35 +42,43 @@ if $USE_TMUX; then
     tmux attach -t "$SESSION"
 else
     # ── Background jobs ───────────────────────────────────────────────────────
+    SESSIONS_DIR="$SCRIPT_DIR/output/sessions"
+    mkdir -p "$SESSIONS_DIR"
+    # Snapshot files that already exist BEFORE this run, so we don't mistake them for the new session
+    EXISTING_SESSIONS=$(ls "$SESSIONS_DIR"/*.jsonl 2>/dev/null | grep -v "_summary" | sort || true)
+
     echo "[1] Starting CV pipeline..."
     "$PYTHON" main_cv.py &
     CV_PID=$!
     echo "    CV pipeline PID: $CV_PID"
 
-    echo "    Waiting for session file..."
-    SESSIONS_DIR="$SCRIPT_DIR/output/sessions"
-    
-    VOICE_PID=$!
-    echo "    Voice assistant PID: $VOICE_PID"
+    echo "    Waiting for NEW session file..."
     TIMEOUT=60; ELAPSED=0; SESSION_ID=""
     while [[ $ELAPSED -lt $TIMEOUT ]]; do
         LATEST=$(ls -t "$SESSIONS_DIR"/*.jsonl 2>/dev/null | grep -v "_summary" | head -1)
         if [[ -n "$LATEST" ]]; then
-            sleep 2
-            LATEST=$(ls -t "$SESSIONS_DIR"/*.jsonl 2>/dev/null | grep -v "_summary" | head -1)
-            SESSION_ID=$(basename "$LATEST" .jsonl)
-            echo "    Session file found: $SESSION_ID"
-            break
+            LATEST_NAME=$(basename "$LATEST")
+            # Only accept it if it was NOT in the pre-existing list
+            if ! echo "$EXISTING_SESSIONS" | grep -qF "$LATEST_NAME"; then
+                sleep 2  # give the file time to stabilize
+                LATEST=$(ls -t "$SESSIONS_DIR"/*.jsonl 2>/dev/null | grep -v "_summary" | head -1)
+                SESSION_ID=$(basename "$LATEST" .jsonl)
+                echo "    New session file found: $SESSION_ID"
+                break
+            fi
         fi
         sleep 1; ELAPSED=$((ELAPSED + 1))
         echo "    ... ${ELAPSED}s"
     done
     if [[ -z "$SESSION_ID" ]]; then
-        echo "[WARN] No session file after ${TIMEOUT}s — voice assistant will use temp ID."
+        echo "[WARN] No new session file after ${TIMEOUT}s — voice assistant will use temp ID."
     fi
 
     echo "[2] Starting Voice Assistant..."
     "$PYTHON" run_voice_assistant.py --session-id "$SESSION_ID" &
+    VOICE_PID=$!
+    echo "    Voice assistant PID: $VOICE_PID"
+
     echo ""
     echo "Both processes running. Press Ctrl-C to stop both."
     trap "kill $CV_PID $VOICE_PID 2>/dev/null; echo 'Stopped.'" EXIT INT TERM
