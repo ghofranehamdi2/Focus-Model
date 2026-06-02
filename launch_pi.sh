@@ -27,6 +27,10 @@ fi
 
 cd "$SCRIPT_DIR"
 
+# Kill any leftover processes from a previous run before starting fresh
+pkill -f main_cv.py 2>/dev/null || true
+pkill -f run_voice_assistant.py 2>/dev/null || true
+
 if $USE_TMUX; then
     # ── tmux: two panes side by side ─────────────────────────────────────────
     SESSION="smartfocus"
@@ -81,6 +85,6 @@ else
 
     echo ""
     echo "Both processes running. Press Ctrl-C to stop both."
-    trap "kill $CV_PID $VOICE_PID 2>/dev/null; echo 'Stopped.'" EXIT INT TERM
+    trap "kill $CV_PID $VOICE_PID 2>/dev/null; pkill -f main_cv.py 2>/dev/null; pkill -f run_voice_assistant.py 2>/dev/null; echo 'Stopped.'" EXIT INT TERM
     wait
 fi
